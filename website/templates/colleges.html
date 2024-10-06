@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %} Colleges {% endblock %}
+
+{% block head %}
+<div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/" style="color: rgb(24,122,153); font-family: Koulen;">
+                <i class="fa-solid fa-list"></i> SSIS
+            </a>
+           
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin-left: 41%;">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/" style="color: rgb(24,122,153); font-family: Koulen;"> Students</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/courses" style="color: rgb(24,122,153); font-family: Koulen;"> Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/colleges" style="color: rgb(24,122,153); font-family: Koulen;"> Colleges</a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="{{ url_for('students.search_colleges') }}" method="POST" class="d-flex">
+                            <select name="search_field" id="search_field" class="form-select me-2" style="max-width: 150px;">
+                                <option value="COLLEGE_CODE">College Code</option>
+                                <option value="COLLEGE_NAME">College Name</option>
+                            </select>
+                            <input type="text" name="search_value" id="search_value" class="form-control me-2" placeholder="Search Value" style="max-width: 200px;">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<!--STYLE-->
+<style>
+#head{
+    background-color: rgb(24,122,153);
+    color: white;
+    font-family: Inter;
+    position: sticky;
+}
+.form-control::placeholder{
+    color: rgba(95, 94, 94, 0.658);
+    text-align: center;
+}
+input{
+    color: white;
+}
+</style>
+
+<!--TITLE-->
+<div style="margin-top: 100px; margin-bottom: 50px;">
+  <h1 style="text-align: center; font-size: 100px; font-family: Koulen; 
+  background: linear-gradient(to right, #093757 35%, #60bbe6 65%); -webkit-background-clip: text;
+   color: transparent; background-clip: text;">Colleges</h1>
+</div>
+
+<!--BUTTON-->
+<div class="d-flex justify-content-center mb-4">
+    <button
+      class="btn btn-xl"
+      data-bs-toggle="modal"
+      data-bs-target="#modalColleges"
+      aria-controls="modalColleges"
+      type="button"
+      style="background-color: rgb(14, 111, 141); color: white; height: 50px; font-family: Inter; font-weight: 500; font-size: 16px; width: 40%;"
+    >
+    <i class="fa-solid fa-circle-plus" style="color: #f0f3f4;"></i> <span style="margin-left: 10px;">ADD COLLEGE</span>
+    </button>
+</div>
+
+<!--MODAL: ADD COLLEGE-->
+<div class="modal fade" id="modalColleges" tabindex="-1" aria-labelledby="modalColleges" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add College</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ url_for('students.collegesPage') }}" method="POST">
+            <div class="mb-2">
+              <label class="form-label" for="COLLEGE_CODE" style="color: rgb(0, 0, 0);">COLLEGE CODE</label>
+              <input
+                type="text"
+                id="COLLEGE_CODE"
+                class="form-control"
+                name="COLLEGE_CODE"
+                placeholder="'CCS'"
+                style="font-family: Inter;"
+              />
+            </div>
+            <div class="mb-2">
+              <label class="form-label" for="COLLEGE_NAME" style="color: rgb(0, 0, 0);">COLLEGE NAME</label>
+              <input
+                type="text"
+                id="COLLEGE_NAME"
+                class="form-control"
+                name="COLLEGE_NAME"
+                placeholder="'College of Computer Studies'"
+                style=" font-family: Inter;"
+              />
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Add</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!--TABLE-->
+<div class="table-responsive mb-5">
+    <table class="table">
+      <thead>
+        <tr id="head">
+          <th scope="col" style="background: linear-gradient(to right, #041f28, #073a4a); color: white;">COLLEGE CODE</th>
+          <th scope="col" style="background: linear-gradient(to right, #073a4a, #0d637e); color: white;">COLLEGE NAME</th>
+          <th scope="col" style="background: linear-gradient(to right, #0d637e, #1d809f); color: white;"></th>
+          <th scope="col" style="background: linear-gradient(to right, #1d809f, #2f94b4); color: white;"></th>
+      </tr>
+      </thead>
+      <tbody>
+        {% if colleges %}
+          {% for data in colleges %}
+          <tr>
+            <td>{{ data.COLLEGE_CODE }}</td>
+            <td>{{ data.COLLEGE_NAME }}</td>
+            <td></td>
+            <td>
+              <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit{{ data.COLLEGE_CODE }}"><i class="fa-solid fa-gear"></i></button>
+              <form action="{{ url_for('students.deleteCollege', college_code=data['COLLEGE_CODE']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete this college?');">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </form>
+            </td>
+          </tr>
+  
+          <!-- Modal Edit College -->
+          <div class="modal fade" id="modaledit{{ data.COLLEGE_CODE }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Edit College</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form action="{{ url_for('students.collegesUpdate') }}" method="POST">
+                    <input type="hidden" name="OLD_COLLEGE_CODE" value="{{ data['COLLEGE_CODE'] }}">
+                    
+                    <div class="mb-2">
+                        <label class="form-label" for="NEW_COLLEGE_CODE">COLLEGE CODE</label>
+                        <input
+                            type="text"
+                            id="NEW_COLLEGE_CODE"
+                            class="form-control"
+                            name="NEW_COLLEGE_CODE"
+                            value="{{ data['COLLEGE_CODE'] }}"
+                        />
+                    </div>
+                
+                    <div class="mb-2">
+                        <label class="form-label" for="COLLEGE_NAME">COLLEGE NAME</label>
+                        <input
+                            type="text"
+                            id="COLLEGE_NAME"
+                            class="form-control"
+                            name="COLLEGE_NAME"
+                            value="{{ data['COLLEGE_NAME'] }}"
+                        />
+                    </div>
+                
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div> 
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="3">No Colleges found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+</div>
+
+{% endblock %}

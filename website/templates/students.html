@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+{% block title %} Students {% endblock %}
+
+{% block head %}
+<div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/" style="color: rgb(24,122,153); font-family: Koulen;">
+                <i class="fa-solid fa-list"></i> SSIS
+            </a>
+           
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin-left: 41%;">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/" style="color: rgb(24,122,153); font-family: Koulen;"> Students</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/courses" style="color: rgb(24,122,153); font-family: Koulen;"> Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/colleges" style="color: rgb(24,122,153); font-family: Koulen;"> Colleges</a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="{{ url_for('students.search_students') }}" method="POST" class="d-flex">
+                            <select name="search_field" id="search_field" class="form-select me-2" style="max-width: 150px;">
+                                <option value="ID">ID</option>
+                                <option value="FIRST_NAME">First Name</option>
+                                <option value="LAST_NAME">Last Name</option>
+                                <option value="COURSE_CODE">Course Code</option>
+                                <option value="YEAR">Year</option>
+                                <option value="GENDER">Gender</option>
+                            </select>
+                            <input type="text" name="search_value" id="search_value" class="form-control me-2" placeholder="Search Value" style="max-width: 200px;">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<!--STYLE-->
+<style>
+#head {
+    background-color: rgb(24, 122, 153);
+    color: white;
+    font-family: Inter;
+    position: sticky;
+}
+.form-control::placeholder {
+    color: rgba(95, 94, 94, 0.658);
+    text-align: center;
+}
+input {
+    color: white;
+}
+</style>
+
+<!--TITLE-->
+<div style="margin-top: 100px; margin-bottom: 50px;">
+    <h1 style="text-align: center; font-size: 100px; font-family: Koulen; 
+    background: linear-gradient(to right, #093757 35%, #60bbe6 65%); -webkit-background-clip: text;
+    color: transparent; background-clip: text;">STUDENTS</h1>
+</div>
+
+<!--BUTTON-->
+<div style="margin-bottom: 30px;">
+    <div class="pt-3 mb-4" style="margin-left: 37.5%;">
+        <button
+            data-mdb-button-init
+            data-mdb-ripple-init
+            class="btn btn-xl"
+            data-bs-toggle="modal"
+            data-bs-target="#modalStudents"
+            aria-controls="modalStudents"
+            type="button"
+            style="
+                background-color: rgb(14, 111, 141);
+                color: white;
+                height: 50px;
+                font-family: Inter;
+                font-weight: 500;
+                font-size: 16px;
+                width: 40%;
+            "
+        >
+            <i class="fa-solid fa-circle-plus" style="color: #f0f3f4;"></i>
+            <span style="margin-left: 10px;">ADD STUDENT</span>
+        </button>
+    </div>
+</div>
+
+<!--MODAL-->
+<div class="modal fade" id="modalStudents" tabindex="-1" aria-labelledby="modalStudents" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('students.studentsPage') }}" method="POST">
+                    <div class="mb-2">
+                        <label class="form-label" for="ID" style="color: rgb(0, 0, 0);">ID</label>
+                        <input
+                            type="text"
+                            id="ID"
+                            class="form-control"
+                            name="ID"
+                            placeholder="'2000-0001'"
+                            style="font-family: Inter;"
+                        />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label" for="FIRST_NAME" style="color: rgb(0, 0, 0);">FIRST NAME</label>
+                        <input
+                            type="text"
+                            id="FIRST_NAME"
+                            class="form-control"
+                            name="FIRST_NAME"
+                            placeholder="'Wardell Stephen'"
+                            style=" font-family: Inter;"
+                        />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label" for="LAST_NAME" style="color: rgb(0, 0, 0);">LAST NAME</label>
+                        <input
+                            type="text"
+                            id="LAST_NAME"
+                            class="form-control"
+                            name="LAST_NAME"
+                            placeholder="'Curry'"
+                            style="font-family: Inter;"
+                        />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="COURSE_CODE" style="color: rgb(0, 0, 0);">Select Course</label>
+                        <select class="form-select form-select-lg mb-3" id="COURSE_CODE" name="COURSE_CODE">
+                            <option value="" disabled selected>-- Select Course --</option>
+                            {% for course in Cval %}
+                            <option value="{{ course.COURSE_CODE }}">{{ course.COURSE_NAME }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="YEAR" style="color: rgb(0, 0, 0);">Year Level</label>
+                        <select class="form-select form-select-lg" id="YEAR" name="YEAR">
+                            <option value="" disabled selected>-- Select Year --</option>
+                            <option value="1st Year">1st year</option>
+                            <option value="2nd Year">2nd year</option>
+                            <option value="3rd Year">3rd year</option>
+                            <option value="4th Year">4th year</option>
+                            <option value="4th Year Ext.">4th year plus</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="GENDER" style="color: rgb(0, 0, 0);">Gender</label>
+                        <select class="form-select form-select-lg" id="GENDER" name="GENDER">
+                            <option value="" disabled selected>-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TABLE-->
+<div style="margin-bottom: 250px; overflow-x: auto;">
+    <table class="table">
+        <thead>
+            <tr id="head">
+                <th scope="col" style="background: linear-gradient(to right, #041f28, #073a4a); color: white;">ID</th>
+                <th scope="col" style="background: linear-gradient(to right, #073a4a, #0d637e); color: white;">FIRST NAME</th>
+                <th scope="col" style="background: linear-gradient(to right, #0d637e, #1d809f); color: white;">LAST NAME</th>
+                <th scope="col" style="background: linear-gradient(to right, #1d809f, #2f94b4); color: white;">COURSE</th>
+                <th scope="col" style="background: linear-gradient(to right, #2f94b4, #40a7c7); color: white;">YEAR</th>
+                <th scope="col" style="background: linear-gradient(to right, #40a7c7, #57c0e2); color: white;">GENDER</th>
+                <th scope="col" style="background: linear-gradient(to right, #57c0e2, #6dd9fb); color: white;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if stud %}
+            {% for data in stud %}
+            <tr>
+                <td>{{ data['ID'] }}</td>
+                <td>{{ data['FIRST_NAME'] }}</td>
+                <td>{{ data['LAST_NAME'] }}</td>
+                <td>{{ data['COURSE_CODE'] }}</td>
+                <td>{{ data['YEAR'] }}</td>
+                <td>{{ data['GENDER'] }}</td>
+                <td>
+                    <!-- Updated data-bs-target to use a unique modal ID -->
+                    <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit-{{ data['ID'] }}">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                    <form action="{{ url_for('students.deleteStudent', student_id=data['ID']) }}" method="POST" style="display: inline;">
+                      <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete this student?');">
+                          <i class="fa-solid fa-trash"></i>
+                      </button>
+                  </form>
+                </td>
+            </tr>
+
+            <!-- Modal for editing student -->
+            <div class="modal fade" id="modaledit-{{ data['ID'] }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Update Student Information</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{ url_for('students.studentsUpdate') }}" method="POST">
+                                <input type="hidden" name="OLD_ID" value="{{ data['ID'] }}">
+
+                                <div class="mb-2">
+                                  <label class="form-label" for="ID" style="color: rgb(0, 0, 0);">ID</label>
+                                  <input
+                                      type="text"
+                                      id="ID"
+                                      class="form-control"
+                                      name="ID"
+                                      value="{{ data['ID'] }}"
+                                      style="font-family: Inter;"
+                                  />
+                              </div>
+                                
+                                <div class="mb-2">
+                                    <label class="form-label" for="FIRST_NAME" style="color: rgb(0, 0, 0);">FIRST NAME</label>
+                                    <input
+                                        type="text"
+                                        id="FIRST_NAME"
+                                        class="form-control"
+                                        name="FIRST_NAME"
+                                        value="{{ data['FIRST_NAME'] }}"
+                                        style="font-family: Inter;"
+                                    />
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label" for="LAST_NAME" style="color: rgb(0, 0, 0);">LAST NAME</label>
+                                    <input
+                                        type="text"
+                                        id="LAST_NAME"
+                                        class="form-control"
+                                        name="LAST_NAME"
+                                        value="{{ data['LAST_NAME'] }}"
+                                        style="font-family: Inter;"
+                                    />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="COURSE_CODE" style="color: rgb(0, 0, 0);">Select Course</label>
+                                    <select class="form-select form-select-lg mb-3" id="COURSE_CODE" name="COURSE_CODE">
+                                        <option value="" disabled>Select Course</option>
+                                        {% for course in Cval %}
+                                        <option value="{{ course.COURSE_CODE }}" {% if course.COURSE_CODE == data['COURSE_CODE'] %} selected {% endif %}>
+                                            {{ course.COURSE_NAME }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="YEAR" style="color: rgb(0, 0, 0);">Year Level</label>
+                                    <select class="form-select form-select-lg" id="YEAR" name="YEAR">
+                                        <option value="" disabled>Select Year</option>
+                                        <option value="1st Year" {% if data['YEAR'] == "1st Year" %} selected {% endif %}>1st year</option>
+                                        <option value="2nd Year" {% if data['YEAR'] == "2nd Year" %} selected {% endif %}>2nd year</option>
+                                        <option value="3rd Year" {% if data['YEAR'] == "3rd Year" %} selected {% endif %}>3rd year</option>
+                                        <option value="4th Year" {% if data['YEAR'] == "4th Year" %} selected {% endif %}>4th year</option>
+                                        <option value="4th Year Ext." {% if data['YEAR'] == "4th Year Ext." %} selected {% endif %}>4th year plus</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="GENDER" style="color: rgb(0, 0, 0);">Gender</label>
+                                    <select class="form-select form-select-lg" id="GENDER" name="GENDER">
+                                        <option value="" disabled>Select Gender</option>
+                                        <option value="Male" {% if data['GENDER'] == "Male" %} selected {% endif %}>Male</option>
+                                        <option value="Female" {% if data['GENDER'] == "Female" %} selected {% endif %}>Female</option>
+                                        <option value="Other" {% if data['GENDER'] == "Other" %} selected {% endif %}>Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+            {% else %}
+            <tr><td colspan="8">No students found.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
