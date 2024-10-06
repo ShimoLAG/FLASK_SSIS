@@ -7,6 +7,10 @@ students = Blueprint('students', __name__)
 
 #The whole website
 
+import re
+from flask import flash, redirect, url_for, render_template, request
+import MySQLdb
+
 @students.route('/', methods=['GET', 'POST'])
 def studentsPage():
     def Get_Students():
@@ -37,10 +41,15 @@ def studentsPage():
         cursor.execute("SELECT COUNT(*) FROM students WHERE ID = %s", (ID,))
         count = cursor.fetchone()[0]
 
+        # Regular expression for validating ID format (0000-0000)
+        id_pattern = r'^\d{4}-\d{4}$'
+
         if count > 0:
             flash("Error: ID already exists. Please use a different ID.", category="error")
         elif not FIRST_NAME or not LAST_NAME:
             flash("Error: First Name and Last Name cannot be empty.", category="error")
+        elif not re.match(id_pattern, ID):
+            flash("Error: ID must follow the format 0000-0000.", category="error")
         else:
             # Insert new student if validation passes
             cursor.execute("INSERT INTO students (ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER) VALUES (%s, %s, %s, %s, %s, %s)", (ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER))
@@ -54,6 +63,7 @@ def studentsPage():
     cours = getCourses()
 
     return render_template('students.html', stud=studvalue, Cval=cours)
+
 
 
 
