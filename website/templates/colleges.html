@@ -101,6 +101,7 @@ input{
                 name="COLLEGE_CODE"
                 placeholder="'CCS'"
                 style="font-family: Inter;"
+                required
               />
             </div>
             <div class="mb-2">
@@ -112,6 +113,7 @@ input{
                 name="COLLEGE_NAME"
                 placeholder="'College of Computer Studies'"
                 style=" font-family: Inter;"
+                required
               />
             </div>
             <div class="modal-footer">
@@ -144,11 +146,13 @@ input{
             <td></td>
             <td>
               <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit{{ data.COLLEGE_CODE }}"><i class="fa-solid fa-gear"></i></button>
-              <form action="{{ url_for('students.deleteCollege', college_code=data['COLLEGE_CODE']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete this college?');">
+              <button 
+                    type="button"  
+                    class="btn btn-danger btn-xs" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#deleteModal-{{ data.COLLEGE_CODE }}">
                     <i class="fa-solid fa-trash"></i>
                 </button>
-            </form>
             </td>
           </tr>
   
@@ -172,6 +176,7 @@ input{
                             class="form-control"
                             name="NEW_COLLEGE_CODE"
                             value="{{ data['COLLEGE_CODE'] }}"
+                            required
                         />
                     </div>
                 
@@ -183,6 +188,7 @@ input{
                             class="form-control"
                             name="COLLEGE_NAME"
                             value="{{ data['COLLEGE_NAME'] }}"
+                            required
                         />
                     </div>
                 
@@ -194,6 +200,27 @@ input{
               </div>
             </div>
           </div> 
+
+          <!-- Modal for Delete Confirmation -->
+            <div class="modal fade" id="deleteModal-{{ data.COLLEGE_CODE }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ data.COLLEGE_CODE }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel-{{ data.COLLEGE_CODE }}">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to delete the college <strong>{{ data.COLLEGE_NAME }}</strong> ({{ data.COLLEGE_CODE }})? This action cannot be undone.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ url_for('students.deleteCollege', college_code=data['COLLEGE_CODE']) }}" method="POST" style="display: inline;">
+                      <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           {% endfor %}
         {% else %}
           <tr><td colspan="3">No Colleges found.</td></tr>

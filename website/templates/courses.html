@@ -124,6 +124,7 @@ input{
                       name="COURSE_CODE"
                       placeholder="'BSCS'"
                       style="font-family: Inter;"
+                      required
                     />
             </div>
 
@@ -136,6 +137,7 @@ input{
                       name="COURSE_NAME"
                       placeholder="'Bachelor of Science in Computer Studies'"
                       style=" font-family: Inter;"
+                      required
                     />
             </div>
 
@@ -182,9 +184,9 @@ input{
             <td>
               <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit-{{ data['COURSE_CODE'] }}"><i class="fa-solid fa-gear"></i></button>
               <form action="{{ url_for('students.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
-                <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete this course?');">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ data['COURSE_CODE'] }}">
+                  <i class="fa-solid fa-trash"></i>
+              </button>              
             </form>
             </td>
           </tr>
@@ -203,12 +205,12 @@ input{
                           
                           <div class="mb-2">
                               <label class="form-label" for="NEW_COURSE_CODE">COURSE CODE</label>
-                              <input type="text" id="NEW_COURSE_CODE" class="form-control" name="NEW_COURSE_CODE" value="{{ data['COURSE_CODE'] }}">
+                              <input type="text" id="NEW_COURSE_CODE" class="form-control" name="NEW_COURSE_CODE" value="{{ data['COURSE_CODE'] }}" required>
                           </div>
                       
                           <div class="mb-2">
                               <label class="form-label" for="COURSE_NAME">COURSE NAME</label>
-                              <input type="text" id="COURSE_NAME" class="form-control" name="COURSE_NAME" value="{{ data['COURSE_NAME'] }}">
+                              <input type="text" id="COURSE_NAME" class="form-control" name="COURSE_NAME" value="{{ data['COURSE_NAME'] }}" required>
                           </div>
                       
                           <div class="mb-3">
@@ -231,6 +233,27 @@ input{
                   </div>
               </div>
           </div>
+
+          <div class="modal fade" id="deleteModal-{{ data['COURSE_CODE'] }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ data['COURSE_CODE'] }}" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="deleteModalLabel-{{ data['COURSE_CODE'] }}">Confirm Deletion</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to delete the course <strong>{{ data['COURSE_NAME'] }}</strong> ({{ data['COURSE_CODE'] }})? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <form action="{{ url_for('students.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          
 
           {% endfor %}
         {% else %}

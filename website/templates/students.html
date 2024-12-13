@@ -118,6 +118,7 @@ input {
                             name="ID"
                             placeholder="'2000-0001'"
                             style="font-family: Inter;"
+                            required
                         />
                     </div>
 
@@ -139,6 +140,7 @@ input {
                             name="FIRST_NAME"
                             placeholder="'Wardell Stephen'"
                             style=" font-family: Inter;"
+                            required
                         />
                     </div>
 
@@ -151,6 +153,7 @@ input {
                             name="LAST_NAME"
                             placeholder="'Curry'"
                             style="font-family: Inter;"
+                            required
                         />
                     </div>
 
@@ -227,11 +230,9 @@ input {
                     <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit-{{ data['ID'] }}">
                         <i class="fa-solid fa-gear"></i>
                     </button>
-                    <form action="{{ url_for('students.deleteStudent', student_id=data['ID']) }}" method="POST" style="display: inline;">
-                      <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Are you sure you want to delete this student?');">
-                          <i class="fa-solid fa-trash"></i>
-                      </button>
-                  </form>
+                    <button class="btn btn-danger btn-xs" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ data['ID'] }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
             </tr>
 
@@ -256,6 +257,7 @@ input {
                                       name="ID"
                                       value="{{ data['ID'] }}"
                                       style="font-family: Inter;"
+                                      required
                                   />
                                 </div>
 
@@ -277,6 +279,7 @@ input {
                                         name="FIRST_NAME"
                                         value="{{ data['FIRST_NAME'] }}"
                                         style="font-family: Inter;"
+                                        required
                                     />
                                 </div>
 
@@ -289,6 +292,7 @@ input {
                                         name="LAST_NAME"
                                         value="{{ data['LAST_NAME'] }}"
                                         style="font-family: Inter;"
+                                        required
                                     />
                                 </div>
 
@@ -335,6 +339,28 @@ input {
                     </div>
                 </div>
             </div>
+
+            <!-- Modal for Deleting a Student -->
+            <div class="modal fade" id="deleteModal-{{ data['ID'] }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ data['ID'] }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel-{{ data['ID'] }}">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete the student <strong>{{ data['name'] }}</strong> (ID: {{ data['ID'] }})? This action cannot be undone.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('students.deleteStudent', student_id=data['ID']) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
 
             {% endfor %}
             {% else %}
