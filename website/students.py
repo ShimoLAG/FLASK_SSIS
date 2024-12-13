@@ -1,7 +1,22 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 import MySQLdb.cursors
+import cloudinary
+from cloudinary import CloudinaryImage
+import cloudinary.uploader
+import cloudinary.api
+from dotenv import load_dotenv
+load_dotenv()
 from . import mysql
 
+# DB_HOST=localhost
+# DB_PORT=3306
+# DB_NAME=fssis
+# DB_USERNAME=root
+# DB_PASSWORD=root
+# SECRET_KEY=thisisarandomsecretkey1111
+# BOOTSTRAP_SERVE_LOCAL=True
+# PIPENV_VENV_IN_PROJECT=1
+# CLOUDINARY_URL=cloudinary://419821381875283:Ca2sfgxZK8i4e24vqHPi0ED62Yk@dgmaqsdil
 
 students = Blueprint('students', __name__)
 
@@ -15,7 +30,7 @@ import MySQLdb
 def studentsPage():
     def Get_Students():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students')
+        cursor.execute('SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students')
         student = cursor.fetchall()
         cursor.close()
         return student
@@ -29,6 +44,7 @@ def studentsPage():
     
     if request.method == 'POST':
         ID = request.form['ID']
+        IMAGE = request.form['IMAGE']
         FIRST_NAME = request.form['FIRST_NAME']
         LAST_NAME = request.form['LAST_NAME']
         COURSE_CODE = request.form['COURSE_CODE']
@@ -52,7 +68,7 @@ def studentsPage():
             flash("Error: ID must follow the format 0000-0000.", category="error")
         else:
             # Insert new student if validation passes
-            cursor.execute("INSERT INTO students (ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER) VALUES (%s, %s, %s, %s, %s, %s)", (ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER))
+            cursor.execute("INSERT INTO students (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER) VALUES (%s, %s, %s, %s, %s, %s, %s)", (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER))
             mysql.connection.commit()
             flash("Student added successfully!", category="success")
         
@@ -232,6 +248,7 @@ def studentsUpdate():
     if request.method == 'POST':
         OLD_ID = request.form['OLD_ID']  # Hidden input to hold the original student ID
         NEW_ID = request.form['ID']  # Assuming the ID field is also in the form
+        IMAGE = request.form['IMAGE']
         FIRST_NAME = request.form['FIRST_NAME']
         LAST_NAME = request.form['LAST_NAME']
         COURSE_CODE = request.form['COURSE_CODE']
@@ -256,9 +273,9 @@ def studentsUpdate():
         # Update the student information
         cur.execute(''' 
                     UPDATE students 
-                    SET ID = %s, FIRST_NAME = %s, LAST_NAME = %s, COURSE_CODE = %s, YEAR = %s, GENDER = %s 
+                    SET ID = %s, IMAGE = %s, FIRST_NAME = %s, LAST_NAME = %s, COURSE_CODE = %s, YEAR = %s, GENDER = %s 
                     WHERE ID = %s 
-                    ''', (NEW_ID, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER, OLD_ID))
+                    ''', (NEW_ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER, OLD_ID))
 
         mysql.connection.commit()
         cur.close()
