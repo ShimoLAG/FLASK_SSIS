@@ -15,9 +15,11 @@ def create_app():
 
     mysql.init_app(app)
 
-    from .students import students
+    from .routes import routes
+    from .controller import controller
 
-    app.register_blueprint(students, url_prefix = '/')
+    app.register_blueprint(routes, url_prefix = '/')
+    app.register_blueprint(controller, url_prefix='/')
 
 
 

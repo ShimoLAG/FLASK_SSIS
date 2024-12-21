@@ -26,7 +26,7 @@
                         <a class="nav-link" href="/colleges" style="color: rgb(24,122,153); font-family: Koulen;"> Colleges</a>
                     </li>
                     <li class="nav-item">
-                        <form action="{{ url_for('students.search_courses') }}" method="POST" class="d-flex">
+                        <form action="{{ url_for('controller.search_courses') }}" method="POST" class="d-flex">
                             <select name="search_field" id="search_field" class="form-select me-2" style="max-width: 150px;">
                                 <option value="COURSE_CODE">Course Code</option>
                                 <option value="COURSE_NAME">Course Name</option>
@@ -114,7 +114,7 @@ input{
         </div>
         <div class="modal-body">
           
-          <form action="{{ url_for('students.coursesPage') }}" method="POST">
+          <form action="{{ url_for('routes.coursesPage') }}" method="POST">
             <div class="mb-2">
                     <label class="form-label" for="COURSE_CODE" style="color: rgb(0, 0, 0);">COURSE CODE</label>
                     <input
@@ -183,7 +183,7 @@ input{
             <td>{{ data['COLLEGE_CODE'] }}</td>
             <td>
               <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#modaledit-{{ data['COURSE_CODE'] }}"><i class="fa-solid fa-gear"></i></button>
-              <form action="{{ url_for('students.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
+              <form action="{{ url_for('controller.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
                 <button type="button" class="btn btn-danger btn-xs" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ data['COURSE_CODE'] }}">
                   <i class="fa-solid fa-trash"></i>
               </button>              
@@ -200,7 +200,7 @@ input{
                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
                       <div class="modal-body">
-                        <form action="{{ url_for('students.coursesUpdate') }}" method="POST">
+                        <form action="{{ url_for('controller.coursesUpdate') }}" method="POST">
                           <input type="hidden" name="OLD_COURSE_CODE" value="{{ data['COURSE_CODE'] }}">
                           
                           <div class="mb-2">
@@ -246,7 +246,7 @@ input{
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <form action="{{ url_for('students.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
+                  <form action="{{ url_for('controller.deleteCourse', course_code=data['COURSE_CODE']) }}" method="POST" style="display: inline;">
                     <button type="submit" class="btn btn-danger">Delete</button>
                   </form>
                 </div>

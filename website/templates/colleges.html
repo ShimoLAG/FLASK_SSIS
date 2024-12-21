@@ -25,7 +25,7 @@
                         <a class="nav-link" href="/colleges" style="color: rgb(24,122,153); font-family: Koulen;"> Colleges</a>
                     </li>
                     <li class="nav-item">
-                        <form action="{{ url_for('students.search_colleges') }}" method="POST" class="d-flex">
+                        <form action="{{ url_for('controller.search_colleges') }}" method="POST" class="d-flex">
                             <select name="search_field" id="search_field" class="form-select me-2" style="max-width: 150px;">
                                 <option value="COLLEGE_CODE">College Code</option>
                                 <option value="COLLEGE_NAME">College Name</option>
@@ -91,7 +91,7 @@ input{
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="{{ url_for('students.collegesPage') }}" method="POST">
+          <form action="{{ url_for('routes.collegesPage') }}" method="POST">
             <div class="mb-2">
               <label class="form-label" for="COLLEGE_CODE" style="color: rgb(0, 0, 0);">COLLEGE CODE</label>
               <input
@@ -165,7 +165,7 @@ input{
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <form action="{{ url_for('students.collegesUpdate') }}" method="POST">
+                  <form action="{{ url_for('controller.collegesUpdate') }}" method="POST">
                     <input type="hidden" name="OLD_COLLEGE_CODE" value="{{ data['COLLEGE_CODE'] }}">
                     
                     <div class="mb-2">
@@ -214,7 +214,7 @@ input{
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="{{ url_for('students.deleteCollege', college_code=data['COLLEGE_CODE']) }}" method="POST" style="display: inline;">
+                    <form action="{{ url_for('controller.deleteCollege', college_code=data['COLLEGE_CODE']) }}" method="POST" style="display: inline;">
                       <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                   </div>
