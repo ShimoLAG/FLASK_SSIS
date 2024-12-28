@@ -219,7 +219,7 @@ input {
             {% for data in stud %}
             <tr>
                 <td>{{ data['ID'] }}</td>
-                <td><img src="{{ data['IMAGE'] }}" style="height: 100px; width: 100px; border-radius: 50%;"/></td>
+                <td><img src="{{ data['IMAGE']  or '/static/default-image.png' }}" style="height: 100px; width: 100px; border-radius: 50%;"/></td>
                 <td>{{ data['FIRST_NAME'] }}</td>
                 <td>{{ data['LAST_NAME'] }}</td>
                 <td>{{ data['COURSE_CODE'] }}</td>

@@ -46,12 +46,16 @@ def studentsPage():
     
     if request.method == 'POST':
         ID = request.form['ID']
-        IMAGE = request.form['IMAGE']
+        IMAGE = request.form.get('IMAGE', '').strip()  # Get IMAGE, default to an empty string
         FIRST_NAME = request.form['FIRST_NAME']
         LAST_NAME = request.form['LAST_NAME']
         COURSE_CODE = request.form['COURSE_CODE']
         YEAR = request.form['YEAR']
         GENDER = request.form['GENDER']
+
+        # Set default image if IMAGE is empty
+        if not IMAGE:
+            IMAGE = '/static/images/default-profile.jpg'  # Ensure this path points to your default image
 
         cursor = mysql.connection.cursor()
         
@@ -70,7 +74,10 @@ def studentsPage():
             flash("Error: ID must follow the format 0000-0000.", category="error")
         else:
             # Insert new student if validation passes
-            cursor.execute("INSERT INTO students (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER) VALUES (%s, %s, %s, %s, %s, %s, %s)", (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER))
+            cursor.execute(
+                "INSERT INTO students (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER)
+            )
             mysql.connection.commit()
             flash("Student added successfully!", category="success")
         
@@ -81,6 +88,7 @@ def studentsPage():
     cours = getCourses()
 
     return render_template('students.html', stud=studvalue, Cval=cours)
+
 
 
 
