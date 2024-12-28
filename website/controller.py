@@ -19,31 +19,56 @@ controller = Blueprint('controller', __name__)
 
 @controller.route('/search_students', methods=['GET', 'POST'])
 def search_students():
-    def get_all_students():
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM students')
-        students = cursor.fetchall()
-        cursor.close()
-        return students
-    
-    if request.method == 'POST':
-        search_field = request.form.get('search_field')
-        search_value = request.form.get('search_value')
+    try:
+        if request.method == 'POST':
+            search_field = request.form.get('search_field')
+            search_value = request.form.get('search_value')
 
-        # Build the query based on the selected search field
-        query = f"SELECT * FROM students WHERE {search_field} LIKE %s"
-        params = [f"%{search_value}%"]
+            # Validate search_field
+            valid_fields = {'ID', 'FIRST_NAME', 'LAST_NAME', 'COURSE_CODE', 'YEAR', 'GENDER'}
+            if search_field not in valid_fields:
+                flash("Invalid search field", "error")
+                return redirect(url_for('routes.studentsPage'))
 
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(query, params)
-        students = cursor.fetchall()
-        cursor.close()
-        
-        return render_template('students.html', stud=students)
+            # Pagination parameters
+            page = request.args.get('page', 1, type=int)
+            per_page = 10
+            offset = (page - 1) * per_page
 
-    # If it's a GET request, just get all students
-    stud = get_all_students()
-    return render_template('students.html', stud=stud)
+            # Build and execute the query
+            query = f"SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students WHERE {search_field} LIKE %s LIMIT %s OFFSET %s"
+            params = [f"%{search_value}%", per_page, offset]
+
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query, params)
+            students = cursor.fetchall()
+
+            # Count total results for pagination
+            count_query = f"SELECT COUNT(*) AS total FROM students WHERE {search_field} LIKE %s"
+            cursor.execute(count_query, [f"%{search_value}%"])
+            total_students = cursor.fetchone()['total']
+            cursor.close()
+
+            total_pages = (total_students + per_page - 1) // per_page
+
+            return render_template(
+                'students.html',
+                stud=students,
+                current_page=page,
+                total_pages=total_pages,
+                search_field=search_field,
+                search_value=search_value
+            )
+
+        # If GET request
+        return redirect(url_for('routes.studentsPage'))
+    except Exception as e:
+        # Log the error for debugging
+        import traceback
+        print(traceback.format_exc())
+        flash("An error occurred while processing your request.", "error")
+        return redirect(url_for('routes.studentsPage'))
+
 
 @controller.route('/search_courses', methods=['POST'])
 def search_courses():

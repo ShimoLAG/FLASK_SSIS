@@ -30,9 +30,9 @@ import MySQLdb
 
 @routes.route('/', methods=['GET', 'POST'])
 def studentsPage():
-    def Get_Students():
+    def Get_Students(offset, limit):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students')
+        cursor.execute('SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students LIMIT %s OFFSET %s', (limit, offset))
         student = cursor.fetchall()
         cursor.close()
         return student
@@ -43,7 +43,12 @@ def studentsPage():
         cour = cursor.fetchall()
         cursor.close()
         return cour
-    
+
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)  # Get the current page from the query string, default to 1
+    per_page = 10  # Number of students to display per page
+    offset = (page - 1) * per_page  # Calculate the offset for the SQL query
+
     if request.method == 'POST':
         ID = request.form['ID']
         IMAGE = request.form.get('IMAGE', '').strip()  # Get IMAGE, default to an empty string
@@ -84,10 +89,26 @@ def studentsPage():
         cursor.close()
         return redirect(url_for('routes.studentsPage'))
     
-    studvalue = Get_Students()
+    # Fetch paginated students and courses
+    studvalue = Get_Students(offset, per_page)
     cours = getCourses()
 
-    return render_template('students.html', stud=studvalue, Cval=cours)
+    # Get total student count for pagination
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT COUNT(*) AS total FROM students')
+    total_students = cursor.fetchone()['total']
+    cursor.close()
+
+    total_pages = (total_students + per_page - 1) // per_page  # Calculate total pages
+
+    return render_template(
+        'students.html',
+        stud=studvalue,
+        Cval=cours,
+        current_page=page,
+        total_pages=total_pages
+    )
+
 
 
 
