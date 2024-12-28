@@ -32,7 +32,13 @@ import MySQLdb
 def studentsPage():
     def Get_Students(offset, limit):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students LIMIT %s OFFSET %s', (limit, offset))
+        cursor.execute("""
+        SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+               students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+        FROM students
+        LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+        LIMIT %s OFFSET %s
+        """, (limit, offset))
         student = cursor.fetchall()
         cursor.close()
         return student

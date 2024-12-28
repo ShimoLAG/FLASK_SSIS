@@ -33,7 +33,7 @@ def search_students():
             search_value = request.form.get('search_value')
 
             # Validate search_field
-            valid_fields = {'ID', 'FIRST_NAME', 'LAST_NAME', 'COURSE_CODE', 'YEAR', 'GENDER'}
+            valid_fields = {'ID', 'FIRST_NAME', 'LAST_NAME', 'COURSE_CODE', 'COURSE_NAME', 'YEAR', 'GENDER'}
             if search_field not in valid_fields:
                 flash("Invalid search field", "error")
                 return redirect(url_for('routes.studentsPage'))
@@ -43,17 +43,83 @@ def search_students():
             per_page = 10
             offset = (page - 1) * per_page
 
-            # Query for matching students
-            query = f"SELECT ID, IMAGE, FIRST_NAME, LAST_NAME, COURSE_CODE, YEAR, GENDER FROM students WHERE {search_field} LIKE %s LIMIT %s OFFSET %s"
-            params = [f"%{search_value}%", per_page, offset]
+            # Handle special case for searching 'none' to find null course codes
+            if search_field in ['COURSE_CODE', 'COURSE_NAME'] and search_value.strip().lower() == 'none':
+                query = """
+                    SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+                           students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.COURSE_CODE IS NULL
+                    LIMIT %s OFFSET %s
+                """
+                params = [per_page, offset]
+                count_query = """
+                    SELECT COUNT(*) AS total
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.COURSE_CODE IS NULL
+                """
+                count_params = []
+            elif search_field == 'COURSE_CODE':
+                query = """
+                    SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+                           students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.COURSE_CODE LIKE %s OR courses.COURSE_NAME LIKE %s
+                    LIMIT %s OFFSET %s
+                """
+                params = [f"%{search_value}%", f"%{search_value}%", per_page, offset]
+                count_query = """
+                    SELECT COUNT(*) AS total
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.COURSE_CODE LIKE %s OR courses.COURSE_NAME LIKE %s
+                """
+                count_params = [f"%{search_value}%", f"%{search_value}%"]
+            elif search_field == 'COURSE_NAME':
+                query = """
+                    SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+                           students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE courses.COURSE_NAME LIKE %s
+                    LIMIT %s OFFSET %s
+                """
+                params = [f"%{search_value}%", per_page, offset]
+                count_query = """
+                    SELECT COUNT(*) AS total
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE courses.COURSE_NAME LIKE %s
+                """
+                count_params = [f"%{search_value}%"]
+            else:
+                query = """
+                    SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+                           students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.{search_field} LIKE %s
+                    LIMIT %s OFFSET %s
+                """
+                query = query.format(search_field=search_field)
+                params = [f"%{search_value}%", per_page, offset]
+                count_query = """
+                    SELECT COUNT(*) AS total
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.{search_field} LIKE %s
+                """
+                count_query = count_query.format(search_field=search_field)
+                count_params = [f"%{search_value}%"]
 
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(query, params)
             students = cursor.fetchall()
 
-            # Count total results for pagination
-            count_query = f"SELECT COUNT(*) AS total FROM students WHERE {search_field} LIKE %s"
-            cursor.execute(count_query, [f"%{search_value}%"])
+            cursor.execute(count_query, count_params)
             total_students = cursor.fetchone()['total']
             cursor.close()
 
@@ -78,7 +144,6 @@ def search_students():
         print(traceback.format_exc())
         flash("An error occurred while processing your request.", "error")
         return redirect(url_for('routes.studentsPage'))
-
 
 
 @controller.route('/search_courses', methods=['POST'])
