@@ -36,7 +36,7 @@ def studentsPage():
         student = cursor.fetchall()
         cursor.close()
         return student
-    
+
     def getCourses():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT COURSE_CODE, COURSE_NAME FROM courses')
@@ -45,9 +45,26 @@ def studentsPage():
         return cour
 
     # Pagination parameters
-    page = request.args.get('page', 1, type=int)  # Get the current page from the query string, default to 1
-    per_page = 10  # Number of students to display per page
-    offset = (page - 1) * per_page  # Calculate the offset for the SQL query
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    # Get total student count for pagination
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT COUNT(*) AS total FROM students')
+    total_students = cursor.fetchone()['total']
+    cursor.close()
+
+    # Calculate total pages
+    total_pages = (total_students + per_page - 1) // per_page
+
+    # Ensure page is within range
+    if page < 1:
+        flash("Invalid page number.", "error")
+        return redirect(url_for('routes.studentsPage', page=1))
+    if page > total_pages:
+        flash("Page out of range.", "error")
+        return redirect(url_for('routes.studentsPage', page=total_pages))
 
     if request.method == 'POST':
         ID = request.form['ID']
@@ -63,7 +80,7 @@ def studentsPage():
             IMAGE = '/static/images/default-profile.jpg'  # Ensure this path points to your default image
 
         cursor = mysql.connection.cursor()
-        
+
         # Check if the ID already exists
         cursor.execute("SELECT COUNT(*) FROM students WHERE ID = %s", (ID,))
         count = cursor.fetchone()[0]
@@ -85,21 +102,13 @@ def studentsPage():
             )
             mysql.connection.commit()
             flash("Student added successfully!", category="success")
-        
+
         cursor.close()
         return redirect(url_for('routes.studentsPage'))
-    
+
     # Fetch paginated students and courses
     studvalue = Get_Students(offset, per_page)
     cours = getCourses()
-
-    # Get total student count for pagination
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT COUNT(*) AS total FROM students')
-    total_students = cursor.fetchone()['total']
-    cursor.close()
-
-    total_pages = (total_students + per_page - 1) // per_page  # Calculate total pages
 
     return render_template(
         'students.html',
@@ -108,13 +117,6 @@ def studentsPage():
         current_page=page,
         total_pages=total_pages
     )
-
-
-
-
-
-
-
 
 
 #The courses table
