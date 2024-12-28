@@ -121,7 +121,9 @@ def studentsPage():
         stud=studvalue,
         Cval=cours,
         current_page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        search_field=None,  # No search field for default view
+        search_value=None   # No search value for default view
     )
 
 

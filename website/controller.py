@@ -28,9 +28,9 @@ def search_students():
             cursor.close()
             return cours
 
-        if request.method == 'POST':
-            search_field = request.form.get('search_field')
-            search_value = request.form.get('search_value')
+        if request.method == 'POST' or 'search_field' in request.args:
+            search_field = request.args.get('search_field', request.form.get('search_field'))
+            search_value = request.args.get('search_value', request.form.get('search_value'))
 
             # Validate search_field
             valid_fields = {'ID', 'FIRST_NAME', 'LAST_NAME', 'COURSE_CODE', 'COURSE_NAME', 'YEAR', 'GENDER'}
@@ -95,6 +95,23 @@ def search_students():
                     WHERE courses.COURSE_NAME LIKE %s
                 """
                 count_params = [f"%{search_value}%"]
+            elif search_field == 'GENDER':
+                query = """
+                    SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
+                           students.COURSE_CODE, courses.COURSE_NAME, students.YEAR, students.GENDER
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.GENDER = %s
+                    LIMIT %s OFFSET %s
+                """
+                params = [search_value, per_page, offset]
+                count_query = """
+                    SELECT COUNT(*) AS total
+                    FROM students
+                    LEFT JOIN courses ON students.COURSE_CODE = courses.COURSE_CODE
+                    WHERE students.GENDER = %s
+                """
+                count_params = [search_value]
             else:
                 query = """
                     SELECT students.ID, students.IMAGE, students.FIRST_NAME, students.LAST_NAME,
@@ -144,6 +161,7 @@ def search_students():
         print(traceback.format_exc())
         flash("An error occurred while processing your request.", "error")
         return redirect(url_for('routes.studentsPage'))
+
 
 
 @controller.route('/search_courses', methods=['POST'])
